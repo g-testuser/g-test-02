@@ -1231,13 +1231,13 @@ def get_learning_rate(config: dict, task_type: str, trainable_params: int):
     # Clamp to reasonable bounds for stability
 
     if task_type == TaskType.DPOTASK.value:
-        lr = max(min(lr, 5e-4), 3e-5)
+        lr = max(min(lr, 1e-4), 2e-5)
     elif task_type == TaskType.INSTRUCTTEXTTASK.value:
-        lr = max(min(lr, 1e-3), 5e-5)
+        lr = max(min(lr, 2e-4), 5e-5)
     elif task_type == TaskType.GRPOTASK.value:
-        lr = max(min(lr, 2e-4), 1e-5)
+        lr = max(min(lr, 5e-5), 1e-5)
     elif task_type == TaskType.CHATTASK.value:
-        lr = max(min(lr, 1e-3), 5e-5)
+        lr = max(min(lr, 2e-4), 5e-5)
 
     # if training_type.lower() == "instruct":
     #     lr = max(min(lr, 1e-3), 5e-5)
@@ -1427,7 +1427,7 @@ def get_custom_dpo_config(param_nums: int):
             "batch_size": 10,
         },
         "2_4_b": {
-            "learning_rate": 1e-5,
+            "learning_rate": 1.5e-5,
             "distributed": "ddp",
             "gpu_count": 1,
             "batch_size": 4,
@@ -1462,14 +1462,14 @@ def get_custom_dpo_config(param_nums: int):
             "batch_size": 4,
         },
         "15_40_b": {
-            "learning_rate": 8e-6,
+            "learning_rate": 7e-6,
             "distributed": "ds",
             "gpu_count": 4,
             "use_lora": True,
             "batch_size": 2,
         },
         "40_80_b": {
-            "learning_rate": 8e-6,
+            "learning_rate": 5e-6,
             "distributed": "ds",
             "gpu_count": 8,
             "use_lora": True,
@@ -1512,61 +1512,61 @@ def get_custom_dpo_config(param_nums: int):
 def get_custom_grpo_config(param_nums: int):
     GRPO_CONFIG = {
         "0_1_b": {
-            "learning_rate": 0.0002,
+            "learning_rate": 1e-5,
             "distributed": "ddp",
             "gpu_count": 1,
             "batch_size": 8,
         },
         "1_2_b": {
-            "learning_rate": 0.0002,
+            "learning_rate": 1e-5,
             "distributed": "ddp",
             "gpu_count": 1,
             "batch_size": 10,
         },
         "2_4_b": {
-            "learning_rate": 0.0002,
+            "learning_rate": 8e-6,
             "distributed": "ddp",
             "gpu_count": 1,
             "batch_size": 8,
             "use_lora": True
         },
         "4_5_b": {
-            "learning_rate": 0.0002,
+            "learning_rate": 7e-6,
             "distributed": "ddp",
             "gpu_count": 2,
             "batch_size": 8,
             "use_lora": True
         },
         "5_9_b": {
-            "learning_rate": 0.0002,
+            "learning_rate": 5e-6,
             "distributed": "ddp",
             "gpu_count": 2,
             "batch_size": 4,
             "use_lora": True
         },
         "9_12_b": {
-            "learning_rate": 0.0002,
+            "learning_rate": 5e-6,
             "distributed": "ddp",
             "gpu_count": 2,
             "use_lora": True,
             "batch_size": 4,
         },
         "12_15_b": {
-            "learning_rate": 0.0002,
+            "learning_rate": 5e-6,
             "distributed": "ddp",
             "gpu_count": 4,
             "use_lora": True,
             "batch_size": 2,
         },
         "15_40_b": {
-            "learning_rate": 0.0002,
+            "learning_rate": 5e-6,
             "distributed": "ds",
             "gpu_count": 4,
             "use_lora": True,
             "batch_size": 1,
         },
         "40_80_b": {
-            "learning_rate": 0.0002,
+            "learning_rate": 5e-6,
             "distributed": "ds",
             "gpu_count": 8,
             "use_lora": True,
@@ -1737,7 +1737,7 @@ def get_model_architecture(model: str) -> str:
         return "Unknown"
 
 
-def get_model_num_params(model: str, model_path: str) -> int:
+def get_model_num_params(model_id: str, model_path: str) -> int:
     MODEL_CONFIG = {
         "facebook/opt-1.3b": {"model_size": 1_300_000_000},
         "facebook/opt-3b": {"model_size": 3_000_000_000},
@@ -1749,7 +1749,7 @@ def get_model_num_params(model: str, model_path: str) -> int:
         "TinyLlama/TinyLlama_v1.1": {"model_size": 1_100_000_000},
     }
 
-    if model in MODEL_CONFIG:
+    if model_id in MODEL_CONFIG:
         return MODEL_CONFIG[model_id]["model_size"]
     try:
         hf_api = HfApi()
@@ -1760,7 +1760,7 @@ def get_model_num_params(model: str, model_path: str) -> int:
         print(f"Error getting model size from safetensors: {e}")
         try:
             import re
-            model_size = re.search(r"(\d+)(?=[bB])", model)
+            model_size = re.search(r"(\d+)(?=[bB])", model_id)
             model_size = (
                 int(model_size.group(1)) * 1_000_000_000 if model_size else None
             )
