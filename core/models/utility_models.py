@@ -51,9 +51,6 @@ class MinerSubmission(BaseModel):
     repo: str
     model_hash: str | None = None
 
-    # Turn off protected namespace for model
-    model_config = ConfigDict(protected_namespaces=())
-
 
 class MinerTaskResult(BaseModel):
     hotkey: str
@@ -144,12 +141,6 @@ class TextJob(Job):
     file_format: FileFormat
 
 
-class TextValidationJob(Job):
-    dataset: str
-    dataset_type: TextDatasetType
-    file_format: FileFormat
-
-
 class DiffusionJob(Job):
     model_config = ConfigDict(protected_namespaces=())
     dataset_zip: str = Field(
@@ -158,16 +149,7 @@ class DiffusionJob(Job):
         min_length=1,
     )
     model_type: ImageModelType = ImageModelType.SDXL
-
-
-class DiffusionValidationJob(Job):
-    model_config = ConfigDict(protected_namespaces=())
-    dataset_zip: str = Field(
-        ...,
-        description="Link to dataset zip file",
-        min_length=1,
-    )
-    model_type: ImageModelType = ImageModelType.SDXL
+    hours_to_complete: int = Field(..., description="Estimated time to complete the job")
 
 
 class Role(str, Enum):
@@ -230,4 +212,3 @@ class GPUInfo(BaseModel):
 class TrainerInfo(BaseModel):
     trainer_ip: str = Field(..., description="Trainer IP address")
     gpus: list[GPUInfo] = Field(..., description="List of GPUs available on this trainer")
-

@@ -139,6 +139,9 @@ def _load_and_modify_config_diffusion(job: DiffusionJob) -> dict:
     """
     Loads the config template and modifies it to create a new job config.
     """
+    logger.info("===all=job==" * 10)
+    print(job)
+    logger.info("===all=job==" * 10)
     logger.info("Loading config template")
     if job.model_type == ImageModelType.SDXL:
         with open(cst.CONFIG_TEMPLATE_PATH_DIFFUSION_SDXL, "r") as file:
@@ -156,6 +159,10 @@ def _load_and_modify_config_diffusion(job: DiffusionJob) -> dict:
         config["huggingface_repo_id"] = f"{cst.HUGGINGFACE_USERNAME}/{job.expected_repo_name or str(uuid.uuid4())}"
     else:
         logger.error(f"Unknown model type: {job.model_type}")
+    logger.info("===all=config==" * 10)
+    config["max_train_steps"] = config["max_train_steps"]*job.hours_to_complete
+    logger.info(config)
+    logger.info("===all=config==" * 10)
     return config
 
 
@@ -164,7 +171,8 @@ def create_job_diffusion(
     model: str,
     dataset_zip: str,
     model_type: ImageModelType,
-    expected_repo_name: str | None
+    expected_repo_name: str | None,
+    hours_to_complete: str,
 ):
     return DiffusionJob(
         job_id=job_id,
@@ -172,6 +180,7 @@ def create_job_diffusion(
         dataset_zip=dataset_zip,
         model_type=model_type,
         expected_repo_name=expected_repo_name,
+        hours_to_complete=hours_to_complete,
     )
 
 
